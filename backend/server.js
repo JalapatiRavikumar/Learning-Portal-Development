@@ -8,7 +8,12 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Route imports
 import videoRoutes from './routes/videoRoutes.js';
@@ -24,9 +29,20 @@ connectDB();
 const app = express();
 
 // ── Security Middleware ───────────────────────────────────────
+// ── Security Middleware ───────────────────────────────────────
 // Helmet adds secure HTTP headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow video src from different origins
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https://images.unsplash.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", "http://localhost:5000", "http://localhost:5173", "*"],
+      frameSrc: ["'self'", "https://www.youtube.com"]
+    },
+  },
 }));
 
 // CORS — allow only the React frontend origin
@@ -72,9 +88,17 @@ app.use('/api/videos', videoRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/users', userRoutes);
 
-// ── 404 Handler ───────────────────────────────────────────────
-app.use((req, res) => {
+// ── Serve Frontend ──────────────────────────────────────────────
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// ── 404 Handler for API Routes ────────────────────────────────
+app.use('/api', (req, res) => {
   res.status(404).json({ message: `Route ${req.originalUrl} not found.` });
+});
+
+// ── Catch-All for React SPA ───────────────────────────────────
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
 // ── Global Error Handler ──────────────────────────────────────
@@ -95,9 +119,14 @@ app.use((err, req, res, next) => {
 });
 
 // ── Boot Server ───────────────────────────────────────────────
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`\n🚀 GVCC Backend API running on port ${PORT}`);
-  console.log(`   Environment : ${process.env.NODE_ENV}`);
-  console.log(`   Health Check: http://localhost:${PORT}/api/health\n`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5001;
+  app.listen(PORT, () => {
+    console.log(`\n🚀 GVCC Backend API running on port ${PORT}`);
+    console.log(`   Environment : ${process.env.NODE_ENV}`);
+    console.log(`   Health Check: http://localhost:${PORT}/api/health\n`);
+  });
+}
+
+// Required for Vercel Serverless deployments
+export default app;
