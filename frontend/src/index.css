@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* ============================================
+   GVCC Learning Portal — Global Stylesheet
+   ============================================ */
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn { animation: fadeIn 0.3s ease-out both; }
+
+/* Floating DRM watermark animation */
+@keyframes floatWatermark {
+  0%   { transform: translate(5px, 5px); }
+  25%  { transform: translate(calc(100% - 240px), 15px); }
+  50%  { transform: translate(calc(100% - 240px), calc(100% - 42px)); }
+  75%  { transform: translate(15px, calc(100% - 42px)); }
+  100% { transform: translate(5px, 5px); }
+}
+.floating-watermark-animation {
+  animation: floatWatermark 25s infinite linear;
+  pointer-events: none;
+}
+
+/* Hero text glow */
+.text-glow {
+  text-shadow: 0 0 22px rgba(99, 102, 241, 0.65), 0 0 45px rgba(99, 102, 241, 0.3);
+}
+
+/* Anti-print CSS DRM shield */
+@media print { body { display: none !important; } }
+
+/* Video player — remove focus ring */
+video:focus { outline: none; }
+
+/* Terminal scanline texture */
+.terminal-texture {
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+  );
+}
+
+/* Live indicator pulse */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+.live-dot { animation: livePulse 1.4s ease-in-out infinite; }
+
+/* Code syntax highlight tokens */
+.token-keyword  { color: #c084fc; }
+.token-string   { color: #86efac; }
+.token-comment  { color: #4b5563; font-style: italic; }
+.token-function { color: #60a5fa; }
+.token-number   { color: #fb923c; }
